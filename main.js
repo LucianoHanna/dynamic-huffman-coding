@@ -2,11 +2,12 @@ class No {
 }
 
 class Folha extends No {
-    constructor (vazio, caracter, cont) {
+    constructor (vazio, caracter, cont, pai) {
         super()
         this.vazio = vazio
         this.caracter = caracter
         this.cont = cont
+        this.pai = pai
     }
 
     contagem() {
@@ -42,19 +43,10 @@ function procura(caracter, raiz) {
     }
 }
 
-// const raiz = new Folha(true, null, 0)
-
-
-
-// console.log(typeof raiz)
-
-
-
-const folha_e = new Folha(true, null, 0);
-const folha_d = new Folha(false, 'T', 1);
-const raiz = new NoIntermediario(folha_e, folha_d)
-
-console.log(raiz)
-
-console.log('\n\n\n\n\n\n')
-console.log(procura('T', raiz))
+function insere(folhaVazia, caracter) {
+    let raiz = new NoIntermediario(folhaVazia, null)
+    let folhaNova = new Folha(false, caracter, 1, raiz)
+    raiz.filho_direita = folhaNova
+    raiz.filho_esquerda.pai = raiz
+    return raiz
+}
