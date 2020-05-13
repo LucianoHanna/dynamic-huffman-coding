@@ -11,7 +11,7 @@ class Folha extends No {
     }
 
     contagem() {
-        return cont
+        return this.cont
     }
 }
 
@@ -20,6 +20,7 @@ class NoIntermediario extends No {
         super()
         this.filho_esquerda = filho_esquerda
         this.filho_direita = filho_direita
+        this.pai = pai
     }
 
     contagem() {
@@ -46,21 +47,21 @@ function procura(caracter, raiz, caminho) {
     }
 }
 
-function procuraFolhaVazia(raiz) {
+function procuraFolhaVazia(raiz, caminho) {
     if (raiz instanceof NoIntermediario) {
-        let c = procuraFolhaVazia(raiz.filho_esquerda)
+        let c = procuraFolhaVazia(raiz.filho_esquerda, caminho + '0')
 
         if (c == null)
-            return procuraFolhaVazia(raiz.filho_direita)
+            return procuraFolhaVazia(raiz.filho_direita, caminho + '1')
         else
             return c
     }
     else if (raiz.vazio) 
-            return raiz
+            return {raiz, caminho}
 }
 
 function insere(folhaVazia, caracter) {
-    let raiz = new NoIntermediario(folhaVazia, null)
+    let raiz = new NoIntermediario(folhaVazia, null, folhaVazia.pai)
     let folhaNova = new Folha(false, caracter, 1, raiz)
     raiz.filho_direita = folhaNova
     raiz.filho_esquerda.pai = raiz
@@ -70,13 +71,13 @@ function insere(folhaVazia, caracter) {
 function codificaCaracter(raiz, caracter) {
     let obj = procura(caracter, raiz, '');
     if (obj == null) {
-        let folhaVazia = procuraFolhaVazia(raiz)
-        if (folhaVazia.pai.filho_esquerda.vazio)
-            folhaVazia.pai.filho_esquerda = insere(folhaVazia, caracter);
+        let folhaVazia = procuraFolhaVazia(raiz, '')
+        if (folhaVazia.raiz.pai.filho_esquerda.vazio)
+            folhaVazia.raiz.pai.filho_esquerda = insere(folhaVazia.raiz, caracter);
         else
-            folhaVazia.pai.filho_direita = insere(folhaVazia, caracter);
+            folhaVazia.raiz.pai.filho_direita = insere(folhaVazia.raiz, caracter);
 
-        return caracter.charCodeAt(0)
+        return folhaVazia.caminho + caracter.charCodeAt(0)
     } else {
         obj.raiz.cont += 1
         return obj.caminho
