@@ -72,15 +72,20 @@ function codificaCaracter(raiz, caracter) {
     let obj = procura(caracter, raiz, '');
     if (obj == null) {
         let folhaVazia = procuraFolhaVazia(raiz, '')
-        if (folhaVazia.raiz.pai.filho_esquerda.vazio)
+        if (folhaVazia.raiz.pai == undefined)
+            raiz = insere(folhaVazia.raiz, caracter)
+        else if (folhaVazia.raiz.pai.filho_esquerda.vazio)
             folhaVazia.raiz.pai.filho_esquerda = insere(folhaVazia.raiz, caracter);
         else
             folhaVazia.raiz.pai.filho_direita = insere(folhaVazia.raiz, caracter);
 
-        return folhaVazia.caminho + caracter.charCodeAt(0)
+        return {
+            raiz,
+            'caminho': folhaVazia.caminho + caracter.charCodeAt(0).toString(2)
+        }
     } else {
         obj.raiz.cont += 1
-        return obj.caminho
+        return {raiz, 'caminho': obj.caminho}
     }
 }
 
@@ -155,3 +160,17 @@ function troca(obj1, obj2) {
     obj1.pai = obj2.pai
     obj2.pai = tmp
 }
+
+function codificaString(str) {
+    let raiz = new Folha(true, null, 0)
+    let output = ''
+    for (let i = 0; i < str.length; i++) {
+        let tmp = codificaCaracter(raiz, str[i]);
+        raiz = tmp.raiz
+        output +=  tmp.caminho
+        while(balanceamento(raiz));
+    }
+    return output
+}
+
+console.log(codificaString('This is NOT simple'))
