@@ -23,6 +23,30 @@ class NoIntermediario extends No {
         this.pai = pai
     }
 
+    filhos() {
+        let str = ''
+        if (this.filho_esquerda instanceof NoIntermediario) {
+            str += this.filho_esquerda.filhos()
+        }
+        else {
+            if (!this.filho_esquerda.vazio)
+                str += this.filho_esquerda.caracter
+            else 
+                str += 'e0'
+        }
+        if (this.filho_direita instanceof NoIntermediario) {
+            str += this.filho_direita.filhos()
+        }
+        else {
+            if (!this.filho_direita.vazio)
+                str += this.filho_direita.caracter
+            else 
+                str += 'e0'
+        }
+
+        return str
+    }
+
     contagem() {
         this.cont = this.filho_esquerda.contagem() + this.filho_direita.contagem()
         return this.cont
@@ -170,7 +194,69 @@ function codificaString(str) {
         output +=  tmp.caminho
         while(balanceamento(raiz));
     }
-    return output
+    return {raiz, output}
 }
 
-console.log(codificaString('This is NOT simple'))
+function showTree(no) {
+    let z = 'digraph {' + makeString(no) + '}'
+    d3.select("#tree").graphviz()
+    .keyMode('tag-index')
+    .zoom(false)
+    .fade(false)
+    .renderDot(z);
+}
+
+function makeString(no) {
+    let str = ''
+    if (no instanceof Folha) {
+        return ''
+    }
+    else {
+        if (no.filho_esquerda) {
+            if (no.filho_esquerda instanceof Folha) {
+                str += '\"' + no.filhos() + no.contagem().toString() + '\"' + '->'
+                if (no.filho_esquerda.vazio) {
+                    str += '\"e0\"'
+                }
+                else {
+                    str += '\"' + no.filho_esquerda.caracter + no.filho_esquerda.cont + '\"'
+                }
+                str += '[label=0];'
+            }
+            else {
+                str += '\"' + no.filhos() + no.contagem().toString() + '\"' + '->'
+                str += '\"' + no.filho_esquerda.filhos() + no.filho_esquerda.contagem() + '\"' + '[label=0];'
+                str += makeString(no.filho_esquerda)
+            }
+        }
+        if (no.filho_direita) {
+            if (no.filho_direita instanceof Folha) {
+                str += '\"' + no.filhos() + no.contagem().toString() + '\"' + '->'
+                if (no.filho_direita.vazio) {
+                    str += '\"e0\"'
+                }
+                else {
+                    str += '\"' + no.filho_direita.caracter + no.filho_direita.cont + '\"'
+                }
+                str += '[label=1];'
+            }
+            else {
+                str += '\"' + no.filhos() + no.contagem().toString() + '\"' + '->'
+                str += '\"' + no.filho_direita.filhos() + no.filho_direita.contagem() + '\"' + '[label=1];'
+                str += makeString(no.filho_direita)
+            }
+        }
+    }
+    return str
+}
+
+function buttonCodificar() {
+    let str = $('#input-string').val()
+    let x = codificaString(str)
+    showTree(x.raiz)
+}
+
+function buttonDecodificar() {
+    let str = $('#input-string').val()
+    console.log(str)
+}

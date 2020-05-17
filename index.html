@@ -1,6 +1,35 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <script src="main.js"></script>
+        <script src="https://d3js.org/d3.v5.min.js"></script>
+        <script src="https://unpkg.com/viz.js@1.8.0/viz.js" type="javascript/worker"></script>
+        <script src="https://unpkg.com/d3-graphviz@1.3.1/build/d3-graphviz.min.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script type="text/javascript" src="main.js"></script>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto">
+        <link rel="stylesheet" type="text/css" href="style.css">
     </head>
+    <body>
+        <div class="header">
+            <h1>Codificador Huffman Dinâmico</h1>
+        </div>
+
+        <div class="input-buttons">
+            <div class="input-label">
+                <label for="input-string">Digite a sequência a ser codificada/decodificada:</label>
+            </div>
+            <div class="input">
+                <input type="text" id="input-string">
+            </div>
+
+            <div class="buttons">
+                <button onclick="buttonCodificar()">Codificar</button>
+                <button onclick="buttonDecodificar()">Decodificar</button>
+            </div>
+        </div>
+
+        <div id="tree">
+            
+        </div>
+    </body>
 </html>
