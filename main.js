@@ -254,6 +254,7 @@ function buttonCodificar() {
     let str = $('#input-string').val()
     let x = codificaString(str)
     showTree(x.raiz)
+    document.getElementById('string-codificada').innerText = x.output
 }
 
 function buttonDecodificar() {

@@ -3,8 +3,9 @@ h1 {
     text-align: center;
 }
 
-.input-buttons {
+.row {
     text-align: center;
+    margin: 8px;
 }
 
 label {
