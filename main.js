@@ -197,6 +197,41 @@ function codificaString(str) {
     return {raiz, output}
 }
 
+function decodifica(str) {
+    let raiz = new Folha(true, null, 0)
+    let output = ''
+    
+    let no_aux = raiz
+    while (str.length > 0) {
+        if (no_aux instanceof Folha) {
+            let char = ''
+            if (no_aux.vazio) {
+                char = String.fromCharCode(parseInt(str.substr(0, 7), 2))
+                output = output.concat(char)
+                str = str.substr(7)
+            }
+            else {
+                char = no_aux.caracter
+                output = output.concat(no_aux.caracter)
+                str = str.substr(1)
+            }
+            raiz = codificaCaracter(raiz, char).raiz
+            while(balanceamento(raiz));
+            no_aux = raiz
+        }
+        else {
+            if (str.charAt(0) == '0') {
+                no_aux = no_aux.filho_esquerda
+            }
+            else if (str.charAt(0) == '1') {
+                no_aux = no_aux.filho_direita
+            }
+            str = str.substr(1)
+        }
+    }
+    return {raiz, output}
+}
+
 function showTree(no) {
     let z = 'digraph {' + makeString(no) + '}'
     d3.select("#tree").graphviz()
