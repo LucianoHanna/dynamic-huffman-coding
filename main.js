@@ -8,6 +8,7 @@ class Folha extends No {
         this.caracter = caracter
         this.cont = cont
         this.pai = pai
+        this.encontrado = false
     }
 
     contagem() {
@@ -52,6 +53,8 @@ class NoIntermediario extends No {
         return this.cont
     }
 }
+
+let passos = []
 
 function procura(caracter, raiz, caminho) {
     if (raiz instanceof NoIntermediario) {
@@ -105,11 +108,17 @@ function codificaCaracter(raiz, caracter) {
 
         return {
             raiz,
-            'caminho': folhaVazia.caminho + caracter.charCodeAt(0).toString(2)
+            'caminho': folhaVazia.caminho + caracter.charCodeAt(0).toString(2),
+            repetido: false
         }
     } else {
         obj.raiz.cont += 1
-        return {raiz, 'caminho': obj.caminho}
+        obj.raiz.encontrado = true
+        return {
+            raiz,
+            'caminho': obj.caminho,
+            repetido: true
+        }
     }
 }
 
@@ -151,11 +160,29 @@ function balanceamento(raiz) {
         for (let j = lista.length - 1; j > i; j--) {
             if (lista[j].cont < lista[i].cont) {
                 troca(lista[i], lista[j])
-                return true
+                let x = ''
+                let y = ''
+                if (lista[i] instanceof Folha) {
+                    x = lista[i].caracter
+                } else {
+                    x = lista[i].contagem()
+                }
+
+                if (lista[j] instanceof Folha) {
+                    y = lista[j].caracter
+                } else {
+                    y = lista[j].contagem()
+                }
+                return {
+                    state: true,
+                    troca: [x, y]
+                }
             }
         }
     }
-    return false
+    return {
+        state: false
+    }
 }
 
 function troca(obj1, obj2) {
@@ -192,7 +219,27 @@ function codificaString(str) {
         let tmp = codificaCaracter(raiz, str[i]);
         raiz = tmp.raiz
         output +=  tmp.caminho
-        while(balanceamento(raiz));
+        output += ' '
+        passos.push(
+            {
+                arvore: 'digraph {' + makeString(raiz) + '}',
+                insere: str[i],
+                output: output,
+                repetido: tmp.repetido,
+                caminho: tmp.caminho
+            }
+        )
+        let bal = balanceamento(raiz)
+        while(bal.state) {
+            passos.push(
+                {
+                    arvore: 'digraph {' + makeString(raiz) + '}',
+                    troca: bal.troca,
+                    output: output
+                }
+            )
+            bal = balanceamento(raiz)
+        }
     }
     return {raiz, output}
 }
@@ -200,9 +247,9 @@ function codificaString(str) {
 function decodifica(str) {
     let raiz = new Folha(true, null, 0)
     let output = ''
-    
+
     let no_aux = raiz
-    while (str.length > 0) {
+    while (str.length > 0 || no_aux instanceof Folha) {
         if (no_aux instanceof Folha) {
             let char = ''
             if (no_aux.vazio) {
@@ -215,8 +262,28 @@ function decodifica(str) {
                 output = output.concat(no_aux.caracter)
                 str = str.substr(1)
             }
-            raiz = codificaCaracter(raiz, char).raiz
-            while(balanceamento(raiz));
+            let tmp = codificaCaracter(raiz, char)
+            raiz = tmp.raiz
+            passos.push(
+                {
+                    arvore: 'digraph {' + makeString(raiz) + '}',
+                    insere: char,
+                    output: output,
+                    repetido: tmp.repetido,
+                    caminho: tmp.caminho
+                }
+            )
+            let bal = balanceamento(raiz)
+            while(bal.state) {
+                passos.push(
+                    {
+                        arvore: 'digraph {' + makeString(raiz) + '}',
+                        troca: bal.troca,
+                        output: output
+                    }
+                )
+                bal = balanceamento(raiz)
+            }
             no_aux = raiz
         }
         else {
@@ -243,41 +310,57 @@ function showTree(no) {
 
 function makeString(no) {
     let str = ''
+    str += `\"&#xf05e;\"[fillcolor="blue", style="filled"];`
+
     if (no instanceof Folha) {
         return ''
     }
     else {
         if (no.filho_esquerda) {
             if (no.filho_esquerda instanceof Folha) {
-                str += '\"' + no.filhos() + no.contagem().toString() + '\"' + '->'
+                let filhoString = ''
                 if (no.filho_esquerda.vazio) {
-                    str += '\"e0\"'
+                    filhoString = '\"&#xf05e;\"'
                 }
                 else {
-                    str += '\"' + no.filho_esquerda.caracter + no.filho_esquerda.cont + '\"'
+                    if (no.filho_esquerda.caracter == ' ')
+                        filhoString = '\"' + '␣' + no.filho_esquerda.cont + '\"'
+                    else
+                        filhoString = '\"' + no.filho_esquerda.caracter + no.filho_esquerda.cont + '\"'
                 }
-                str += '[label=0];'
+
+                if (no.filho_esquerda.encontrado)
+                    str += `${filhoString}[fillcolor="yellow", style="filled"];`
+
+                str += '\"' + no.filhos() + '{' + no.contagem().toString() + '}' + '\"' + '->' + filhoString + '[label=0];'
             }
             else {
-                str += '\"' + no.filhos() + no.contagem().toString() + '\"' + '->'
-                str += '\"' + no.filho_esquerda.filhos() + no.filho_esquerda.contagem() + '\"' + '[label=0];'
+                str += '\"' + no.filhos() + '{' + no.contagem().toString() + '}' + '\"' + '->'
+                str += '\"' + no.filho_esquerda.filhos() + '{' + no.filho_esquerda.contagem() + '}' + '\"' + '[label=0];'
                 str += makeString(no.filho_esquerda)
             }
         }
         if (no.filho_direita) {
             if (no.filho_direita instanceof Folha) {
-                str += '\"' + no.filhos() + no.contagem().toString() + '\"' + '->'
+                let filhoString
                 if (no.filho_direita.vazio) {
-                    str += '\"e0\"'
+                    filhoString = '\"&#xf05e;\"'
                 }
                 else {
-                    str += '\"' + no.filho_direita.caracter + no.filho_direita.cont + '\"'
+                    if (no.filho_direita.caracter == ' ')
+                        filhoString = '\"' + '␣' + no.filho_direita.cont + '\"'
+                    else
+                        filhoString = '\"' + no.filho_direita.caracter + no.filho_direita.cont  + '\"'
                 }
-                str += '[label=1];'
+                if (no.filho_direita.encontrado)
+                    str += `${filhoString}[fillcolor="yellow", style="filled"];`
+
+
+                str += '\"' + no.filhos() + '{' + no.contagem().toString() + '}' + '\"' + '->' + filhoString + '[label=1];'
             }
             else {
-                str += '\"' + no.filhos() + no.contagem().toString() + '\"' + '->'
-                str += '\"' + no.filho_direita.filhos() + no.filho_direita.contagem() + '\"' + '[label=1];'
+                str += '\"' + no.filhos() + '{' + no.contagem().toString() + '}' + '\"' + '->'
+                str += '\"' + no.filho_direita.filhos() + '{' + no.filho_direita.contagem() + '}' + '\"' + '[label=1];'
                 str += makeString(no.filho_direita)
             }
         }
@@ -287,12 +370,88 @@ function makeString(no) {
 
 function buttonCodificar() {
     let str = $('#input-string').val()
-    let x = codificaString(str)
-    showTree(x.raiz)
-    document.getElementById('string-codificada').innerText = x.output
+    document.getElementById('tree').innerHTML = ''
+    document.getElementById('operacao').innerHTML = ''
+    document.getElementById('string-codificada').innerText = ''
+    document.getElementById('prevStep').disabled = true
+    passos = []
+    stepIndex = -1
+    codificaString(str)
+    
+    if (passos.length > 0)
+        document.getElementById('nextStep').disabled = false
+
 }
 
 function buttonDecodificar() {
     let str = $('#input-string').val()
-    console.log(str)
+    
+    document.getElementById('tree').innerHTML = ''
+    document.getElementById('operacao').innerHTML = ''
+    document.getElementById('string-codificada').innerText = ''
+    document.getElementById('prevStep').disabled = true
+    passos = []
+    stepIndex = -1
+
+    decodifica(str)
+    
+    if (passos.length > 0)
+        document.getElementById('nextStep').disabled = false
+}
+
+let stepIndex = -1
+function renderStep() {
+    if (passos[stepIndex].insere && !passos[stepIndex].repetido)
+        if (passos[stepIndex].insere == ' ')
+            document.getElementById('operacao').innerText = `Insere ␣`
+        else
+            document.getElementById('operacao').innerText = `Insere ${passos[stepIndex].insere}`
+    
+    else if (passos[stepIndex].insere && passos[stepIndex].repetido)
+        document.getElementById('operacao').innerText = `Encontrado ${passos[stepIndex].insere} (${passos[stepIndex].caminho})`
+
+    else if (passos[stepIndex].troca) 
+        document.getElementById('operacao').innerText = `Troca ${passos[stepIndex].troca[0]} <-> ${passos[stepIndex].troca[1]}`
+
+    document.getElementById('string-codificada').innerText = passos[stepIndex].output
+    document.getElementById('tree').innerHTML = ''
+
+    d3.select("#tree").graphviz()
+    .keyMode('tag-index')
+    .zoom(false)
+    .fade(false)
+    .dot(passos[stepIndex].arvore)
+    .render()
+
+    .on('end', () => {
+        let texts = document.querySelectorAll('g > text')
+        for (text of texts) {
+            let str = text.innerHTML.substring(
+                text.innerHTML.lastIndexOf('{') + 1, 
+                text.innerHTML.lastIndexOf('}')
+            )
+            if (str.length > 0)
+                text.innerHTML = str
+        }
+    });
+
+    if (stepIndex == passos.length - 1)
+        document.getElementById('nextStep').disabled = true
+    else
+        document.getElementById('nextStep').disabled = false
+
+    if (stepIndex > 0)
+        document.getElementById('prevStep').disabled = false
+    else
+        document.getElementById('prevStep').disabled = true
+}
+
+function nextStep() {
+    stepIndex += 1
+    renderStep()
+}
+
+function prevStep() {
+    stepIndex -= 1
+    renderStep()
 }

@@ -26,6 +26,10 @@ input {
 }
 
 #tree {
-    text-align: center;
-    margin-top: 8px;
+    text-align: center !important;
+    margin-top: 8px !important;
 }
+
+svg text {
+    font-family: 'Font Awesome 5 Free' !important;
+ }
