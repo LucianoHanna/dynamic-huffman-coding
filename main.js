@@ -244,7 +244,9 @@ function codificaString(str) {
                 {
                     arvore: 'digraph {' + makeString(raiz) + '}',
                     troca: bal.troca,
-                    output: output
+                    output: output,
+                    numeroBitsOriginal: numeroBitsOriginal,
+                    numeroBitsCompactado: numeroBitsCompactado
                 }
             )
             bal = balanceamento(raiz)
