@@ -74,6 +74,12 @@ function procura(caracter, raiz, caminho) {
     }
 }
 
+function ASCIIFormatter(str) {
+    while(str.length < 7)
+        str = '0' + str
+    return str
+}
+
 function procuraFolhaVazia(raiz, caminho) {
     if (raiz instanceof NoIntermediario) {
         let c = procuraFolhaVazia(raiz.filho_esquerda, caminho + '0')
@@ -108,7 +114,7 @@ function codificaCaracter(raiz, caracter) {
 
         return {
             raiz,
-            'caminho': folhaVazia.caminho + caracter.charCodeAt(0).toString(2),
+            'caminho': folhaVazia.caminho + ASCIIFormatter(caracter.charCodeAt(0).toString(2)),
             repetido: false
         }
     } else {
@@ -225,7 +231,7 @@ function codificaString(str) {
         output += tmp.caminho
         output += ' '
 
-        numeroBitsOriginal += str.charCodeAt(0).toString(2).length
+        numeroBitsOriginal += 7
         numeroBitsCompactado += tmp.caminho.length
         passos.push(
             {
@@ -260,18 +266,25 @@ function decodifica(str) {
     let output = ''
 
     let no_aux = raiz
+
+    let numeroBitsOriginal = 0
+    let numeroBitsCompactado = 0
+
     while (str.length > 0 || no_aux instanceof Folha) {
         if (no_aux instanceof Folha) {
+
+            numeroBitsOriginal += 'a'.charCodeAt(0).toString(2).length
+
             let char = ''
             if (no_aux.vazio) {
                 char = String.fromCharCode(parseInt(str.substr(0, 7), 2))
                 output = output.concat(char)
                 str = str.substr(7)
+                numeroBitsCompactado += 7
             }
             else {
                 char = no_aux.caracter
                 output = output.concat(no_aux.caracter)
-                str = str.substr(1)
             }
             let tmp = codificaCaracter(raiz, char)
             raiz = tmp.raiz
@@ -281,7 +294,9 @@ function decodifica(str) {
                     insere: char,
                     output: output,
                     repetido: tmp.repetido,
-                    caminho: tmp.caminho
+                    caminho: tmp.caminho,
+                    numeroBitsOriginal: numeroBitsOriginal,
+                    numeroBitsCompactado: numeroBitsCompactado
                 }
             )
             let bal = balanceamento(raiz)
@@ -290,7 +305,9 @@ function decodifica(str) {
                     {
                         arvore: 'digraph {' + makeString(raiz) + '}',
                         troca: bal.troca,
-                        output: output
+                        output: output,
+                        numeroBitsOriginal: numeroBitsOriginal,
+                        numeroBitsCompactado: numeroBitsCompactado
                     }
                 )
                 bal = balanceamento(raiz)
@@ -300,9 +317,11 @@ function decodifica(str) {
         else {
             if (str.charAt(0) == '0') {
                 no_aux = no_aux.filho_esquerda
+                numeroBitsCompactado += 1
             }
             else if (str.charAt(0) == '1') {
                 no_aux = no_aux.filho_direita
+                numeroBitsCompactado += 1
             }
             str = str.substr(1)
         }
