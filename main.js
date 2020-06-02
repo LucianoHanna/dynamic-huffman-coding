@@ -215,18 +215,27 @@ function troca(obj1, obj2) {
 function codificaString(str) {
     let raiz = new Folha(true, null, 0)
     let output = ''
+
+    let numeroBitsOriginal = 0
+    let numeroBitsCompactado = 0
+
     for (let i = 0; i < str.length; i++) {
         let tmp = codificaCaracter(raiz, str[i]);
         raiz = tmp.raiz
-        output +=  tmp.caminho
+        output += tmp.caminho
         output += ' '
+
+        numeroBitsOriginal += str.charCodeAt(0).toString(2).length
+        numeroBitsCompactado += tmp.caminho.length
         passos.push(
             {
                 arvore: 'digraph {' + makeString(raiz) + '}',
                 insere: str[i],
                 output: output,
                 repetido: tmp.repetido,
-                caminho: tmp.caminho
+                caminho: tmp.caminho,
+                numeroBitsOriginal: numeroBitsOriginal,
+                numeroBitsCompactado: numeroBitsCompactado
             }
         )
         let bal = balanceamento(raiz)
@@ -373,6 +382,7 @@ function buttonCodificar() {
     document.getElementById('tree').innerHTML = ''
     document.getElementById('operacao').innerHTML = ''
     document.getElementById('string-codificada').innerText = ''
+    document.getElementById('taxa-compactacao').innerText = ''
     document.getElementById('prevStep').disabled = true
     passos = []
     stepIndex = -1
@@ -389,6 +399,7 @@ function buttonDecodificar() {
     document.getElementById('tree').innerHTML = ''
     document.getElementById('operacao').innerHTML = ''
     document.getElementById('string-codificada').innerText = ''
+    document.getElementById('taxa-compactacao').innerText = ''
     document.getElementById('prevStep').disabled = true
     passos = []
     stepIndex = -1
@@ -413,6 +424,7 @@ function renderStep() {
     else if (passos[stepIndex].troca) 
         document.getElementById('operacao').innerText = `Troca ${passos[stepIndex].troca[0]} <-> ${passos[stepIndex].troca[1]}`
 
+    document.getElementById('taxa-compactacao').innerText = `${Number(passos[stepIndex].numeroBitsOriginal / passos[stepIndex].numeroBitsCompactado).toFixed(3)} (${passos[stepIndex].numeroBitsOriginal}:${passos[stepIndex].numeroBitsCompactado})`
     document.getElementById('string-codificada').innerText = passos[stepIndex].output
     document.getElementById('tree').innerHTML = ''
 
