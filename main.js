@@ -144,6 +144,7 @@ function listaOrdenadaProfundidade(raiz) {
 }
 
 function listaOrdenadaProfundidadeAuxiliar(raiz, nivel, lista) {
+    raiz.encontrado = false
     let level = nivel
     if (lista[level])
         lista[level].push(raiz)
