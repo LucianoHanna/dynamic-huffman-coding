@@ -75,7 +75,7 @@ function procura(caracter, raiz, caminho) {
 }
 
 function ASCIIFormatter(str) {
-    while(str.length < 7)
+    while(str.length < 8)
         str = '0' + str
     return str
 }
@@ -232,7 +232,7 @@ function codificaString(str) {
         output += tmp.caminho
         output += ' '
 
-        numeroBitsOriginal += 7
+        numeroBitsOriginal += 8
         numeroBitsCompactado += tmp.caminho.length
         passos.push(
             {
@@ -274,14 +274,14 @@ function decodifica(str) {
     while (str.length > 0 || no_aux instanceof Folha) {
         if (no_aux instanceof Folha) {
 
-            numeroBitsOriginal += 'a'.charCodeAt(0).toString(2).length
+            numeroBitsOriginal += 8
 
             let char = ''
             if (no_aux.vazio) {
-                char = String.fromCharCode(parseInt(str.substr(0, 7), 2))
+                char = String.fromCharCode(parseInt(str.substr(0, 8), 2))
                 output = output.concat(char)
-                str = str.substr(7)
-                numeroBitsCompactado += 7
+                str = str.substr(8)
+                numeroBitsCompactado += 8
             }
             else {
                 char = no_aux.caracter
