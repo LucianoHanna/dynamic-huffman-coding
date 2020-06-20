@@ -450,6 +450,26 @@ function renderStep() {
     document.getElementById('string-codificada').innerText = passos[stepIndex].output
     document.getElementById('tree').innerHTML = ''
 
+    if (stepIndex - 1 >= 0) {
+        d3.select("#tree-prev-step").graphviz()
+        .keyMode('title')
+        .zoom(false)
+        .fade(false)
+        .dot(passos[stepIndex-1].arvore)
+        .render()
+        .on('end', () => {
+            let texts = document.querySelectorAll('#tree-prev-step g > text')
+            for (text of texts) {
+                let str = text.innerHTML.substring(
+                    text.innerHTML.lastIndexOf('{') + 1, 
+                    text.innerHTML.lastIndexOf('}')
+                )
+                if (str.length > 0)
+                    text.innerHTML = str
+            }
+        });
+    }
+    
     d3.select("#tree").graphviz()
     .keyMode('tag-index')
     .zoom(false)
@@ -458,7 +478,7 @@ function renderStep() {
     .render()
 
     .on('end', () => {
-        let texts = document.querySelectorAll('g > text')
+        let texts = document.querySelectorAll('#tree g > text')
         for (text of texts) {
             let str = text.innerHTML.substring(
                 text.innerHTML.lastIndexOf('{') + 1, 
