@@ -402,6 +402,7 @@ function makeString(no) {
 function buttonCodificar() {
     let str = $('#input-string').val()
     document.getElementById('tree').innerHTML = ''
+    document.getElementById('tree-prev-step').innerHTML = ''
     document.getElementById('operacao').innerHTML = ''
     document.getElementById('string-codificada').innerText = ''
     document.getElementById('taxa-compactacao').innerText = ''
@@ -419,6 +420,7 @@ function buttonDecodificar() {
     let str = $('#input-string').val()
     
     document.getElementById('tree').innerHTML = ''
+    document.getElementById('tree-prev-step').innerHTML = ''
     document.getElementById('operacao').innerHTML = ''
     document.getElementById('string-codificada').innerText = ''
     document.getElementById('taxa-compactacao').innerText = ''
@@ -449,7 +451,7 @@ function renderStep() {
     document.getElementById('taxa-compactacao').innerText = `${Number(passos[stepIndex].numeroBitsOriginal / passos[stepIndex].numeroBitsCompactado).toFixed(3)} (${passos[stepIndex].numeroBitsOriginal}:${passos[stepIndex].numeroBitsCompactado})`
     document.getElementById('string-codificada').innerText = passos[stepIndex].output
     document.getElementById('tree').innerHTML = ''
-
+    document.getElementById('tree-prev-step').innerHTML = ''
     if (stepIndex - 1 >= 0) {
         d3.select("#tree-prev-step").graphviz()
         .keyMode('title')
