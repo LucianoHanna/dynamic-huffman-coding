@@ -48,3 +48,33 @@ svg text {
     display: flex;
     align-content: space-between;
 }
+
+.subtitle {
+    z-index: 9;
+    display: block;
+    right: 5px;
+    width: fit-content;
+    top: 0;
+    position: absolute;
+    text-align: end;
+}
+
+p {
+    margin: 4px;
+}
+
+body {
+    position: relative;
+}
+
+.no-vazio {
+    background-color: blue;
+}
+
+.no-encontrado {
+    background-color: yellow;
+}
+
+.no-trocado {
+    background-color: red;
+}
