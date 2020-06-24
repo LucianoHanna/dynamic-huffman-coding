@@ -9,6 +9,7 @@ class Folha extends No {
         this.cont = cont
         this.pai = pai
         this.encontrado = false
+        this.trocado = false
     }
 
     contagem() {
@@ -22,6 +23,7 @@ class NoIntermediario extends No {
         this.filho_esquerda = filho_esquerda
         this.filho_direita = filho_direita
         this.pai = pai
+        this.trocado = false
     }
 
     filhos() {
@@ -145,6 +147,7 @@ function listaOrdenadaProfundidade(raiz) {
 
 function listaOrdenadaProfundidadeAuxiliar(raiz, nivel, lista) {
     raiz.encontrado = false
+    raiz.trocado = false
     let level = nivel
     if (lista[level])
         lista[level].push(raiz)
@@ -217,6 +220,9 @@ function troca(obj1, obj2) {
     let tmp = obj1.pai
     obj1.pai = obj2.pai
     obj2.pai = tmp
+
+    obj1.trocado = true
+    obj2.trocado = true
 }
 
 function codificaString(str) {
@@ -363,11 +369,19 @@ function makeString(no) {
                 if (no.filho_esquerda.encontrado)
                     str += `${filhoString}[fillcolor="yellow", style="filled"];`
 
+                if (no.filho_esquerda.trocado)
+                    str += `${filhoString}[fillcolor="red", style="filled"];`
+
                 str += '\"' + no.filhos() + '{' + no.contagem().toString() + '}' + '\"' + '->' + filhoString + '[label=0];'
             }
             else {
+                let filhoString = '\"' + no.filho_esquerda.filhos() + '{' + no.filho_esquerda.contagem() + '}' + '\"'
+
+                if (no.filho_esquerda.trocado)
+                    str += `${filhoString}[fillcolor="red", style="filled"];`
+
                 str += '\"' + no.filhos() + '{' + no.contagem().toString() + '}' + '\"' + '->'
-                str += '\"' + no.filho_esquerda.filhos() + '{' + no.filho_esquerda.contagem() + '}' + '\"' + '[label=0];'
+                str += filhoString + '[label=0];'
                 str += makeString(no.filho_esquerda)
             }
         }
@@ -386,12 +400,20 @@ function makeString(no) {
                 if (no.filho_direita.encontrado)
                     str += `${filhoString}[fillcolor="yellow", style="filled"];`
 
+                if (no.filho_direita.trocado)
+                    str += `${filhoString}[fillcolor="red", style="filled"];`
+
 
                 str += '\"' + no.filhos() + '{' + no.contagem().toString() + '}' + '\"' + '->' + filhoString + '[label=1];'
             }
             else {
+                let filhoString = '\"' + no.filho_direita.filhos() + '{' + no.filho_direita.contagem() + '}' + '\"'
+
+                if (no.filho_direita.trocado)
+                    str += `${filhoString}[fillcolor="red", style="filled"];`
+
                 str += '\"' + no.filhos() + '{' + no.contagem().toString() + '}' + '\"' + '->'
-                str += '\"' + no.filho_direita.filhos() + '{' + no.filho_direita.contagem() + '}' + '\"' + '[label=1];'
+                str += filhoString + '[label=1];'
                 str += makeString(no.filho_direita)
             }
         }
