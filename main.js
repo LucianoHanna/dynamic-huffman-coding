@@ -450,6 +450,8 @@ function buttonCodificar() {
     document.getElementById('operacao').innerHTML = ''
     document.getElementById('string-codificada').innerText = ''
     document.getElementById('taxa-compactacao').innerText = ''
+    document.querySelector('#lista-profundidade-before').innerHTML = ''
+    document.querySelector('#lista-profundidade-after').innerHTML = ''
     document.getElementById('prevStep').disabled = true
     passos = []
     stepIndex = -1
@@ -468,6 +470,8 @@ function buttonDecodificar() {
     document.getElementById('operacao').innerHTML = ''
     document.getElementById('string-codificada').innerText = ''
     document.getElementById('taxa-compactacao').innerText = ''
+    document.querySelector('#lista-profundidade-before').innerHTML = ''
+    document.querySelector('#lista-profundidade-after').innerHTML = ''
     document.getElementById('prevStep').disabled = true
     passos = []
     stepIndex = -1
