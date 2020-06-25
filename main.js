@@ -35,7 +35,7 @@ class NoIntermediario extends No {
             if (!this.filho_esquerda.vazio)
                 str += this.filho_esquerda.caracter
             else 
-                str += 'e0'
+                str += '&#xf05e;'
         }
         if (this.filho_direita instanceof NoIntermediario) {
             str += this.filho_direita.filhos()
@@ -44,7 +44,7 @@ class NoIntermediario extends No {
             if (!this.filho_direita.vazio)
                 str += this.filho_direita.caracter
             else 
-                str += 'e0'
+                str += '&#xf05e;'
         }
 
         return str
@@ -166,6 +166,19 @@ function listaOrdenadaProfundidadeAuxiliar(raiz, nivel, lista) {
 function balanceamento(raiz) {
     let lista = listaOrdenadaProfundidade(raiz)
 
+    let listaString = []
+    for (let i = 0; i < lista.length; i++) {
+        if (lista[i] instanceof Folha)
+            if (lista[i].caracter != null)
+                listaString += `${lista[i].caracter}${lista[i].contagem()}`
+            else
+                listaString += `&#xf05e; ${lista[i].contagem()}`
+
+        else 
+            listaString += `${lista[i].filhos()}${lista[i].contagem()}`
+        listaString += '; '
+    }
+
     for (let i = 0; i < lista.length; i++) {
         for (let j = lista.length - 1; j > i; j--) {
             if (lista[j].cont < lista[i].cont) {
@@ -185,13 +198,15 @@ function balanceamento(raiz) {
                 }
                 return {
                     state: true,
-                    troca: [x, y]
+                    troca: [x, y],
+                    lista: listaString
                 }
             }
         }
     }
     return {
-        state: false
+        state: false,
+        lista: listaString
     }
 }
 
@@ -240,29 +255,32 @@ function codificaString(str) {
 
         numeroBitsOriginal += 8
         numeroBitsCompactado += tmp.caminho.length
+        let toPush = {
+            arvore: 'digraph {' + makeString(raiz) + '}',
+            insere: str[i],
+            output: output,
+            repetido: tmp.repetido,
+            caminho: tmp.caminho,
+            numeroBitsOriginal: numeroBitsOriginal,
+            numeroBitsCompactado: numeroBitsCompactado
+        }
+
+        let bal = balanceamento(raiz)
+        toPush.lista = bal.lista
         passos.push(
-            {
+            toPush
+        )
+        while(bal.state) {
+            let toPush = {
                 arvore: 'digraph {' + makeString(raiz) + '}',
-                insere: str[i],
+                troca: bal.troca,
                 output: output,
-                repetido: tmp.repetido,
-                caminho: tmp.caminho,
                 numeroBitsOriginal: numeroBitsOriginal,
                 numeroBitsCompactado: numeroBitsCompactado
             }
-        )
-        let bal = balanceamento(raiz)
-        while(bal.state) {
-            passos.push(
-                {
-                    arvore: 'digraph {' + makeString(raiz) + '}',
-                    troca: bal.troca,
-                    output: output,
-                    numeroBitsOriginal: numeroBitsOriginal,
-                    numeroBitsCompactado: numeroBitsCompactado
-                }
-            )
             bal = balanceamento(raiz)
+            toPush.lista = bal.lista
+            passos.push(toPush)
         }
     }
     return {raiz, output}
@@ -295,29 +313,33 @@ function decodifica(str) {
             }
             let tmp = codificaCaracter(raiz, char)
             raiz = tmp.raiz
+            let toPush = {
+                arvore: 'digraph {' + makeString(raiz) + '}',
+                insere: char,
+                output: output,
+                repetido: tmp.repetido,
+                caminho: tmp.caminho,
+                numeroBitsOriginal: numeroBitsOriginal,
+                numeroBitsCompactado: numeroBitsCompactado
+            }
+            let bal = balanceamento(raiz)
+            toPush.lista = bal.lista
             passos.push(
-                {
+                toPush
+            )
+            while(bal.state) {
+                toPush = {
                     arvore: 'digraph {' + makeString(raiz) + '}',
-                    insere: char,
+                    troca: bal.troca,
                     output: output,
-                    repetido: tmp.repetido,
-                    caminho: tmp.caminho,
                     numeroBitsOriginal: numeroBitsOriginal,
                     numeroBitsCompactado: numeroBitsCompactado
                 }
-            )
-            let bal = balanceamento(raiz)
-            while(bal.state) {
-                passos.push(
-                    {
-                        arvore: 'digraph {' + makeString(raiz) + '}',
-                        troca: bal.troca,
-                        output: output,
-                        numeroBitsOriginal: numeroBitsOriginal,
-                        numeroBitsCompactado: numeroBitsCompactado
-                    }
-                )
                 bal = balanceamento(raiz)
+                toPush.lista = bal.lista
+                passos.push(
+                    toPush
+                )
             }
             no_aux = raiz
         }
@@ -492,6 +514,7 @@ function renderStep() {
                     text.innerHTML = str
             }
         });
+        document.querySelector('#lista-profundidade-before').innerHTML = passos[stepIndex - 1].lista
     }
     
     d3.select("#tree").graphviz()
@@ -511,6 +534,7 @@ function renderStep() {
             if (str.length > 0)
                 text.innerHTML = str
         }
+        document.querySelector('#lista-profundidade-after').innerHTML = passos[stepIndex].lista
     });
 
     if (stepIndex == passos.length - 1)
