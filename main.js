@@ -484,6 +484,7 @@ function buttonDecodificar() {
 
 let stepIndex = -1
 function renderStep() {
+    disableButtons()
     if (passos[stepIndex].insere && !passos[stepIndex].repetido)
         if (passos[stepIndex].insere == ' ')
             document.getElementById('operacao').innerText = `Insere ␣`
@@ -500,6 +501,9 @@ function renderStep() {
     document.getElementById('string-codificada').innerText = passos[stepIndex].output
     document.getElementById('tree').innerHTML = ''
     document.getElementById('tree-prev-step').innerHTML = ''
+
+    let finalizados = [false, false]
+
     if (stepIndex - 1 >= 0) {
         d3.select("#tree-prev-step").graphviz()
         .keyMode('title')
@@ -517,8 +521,9 @@ function renderStep() {
                 if (str.length > 0)
                     text.innerHTML = str
             }
+            finalizados[0] = true
+            document.querySelector('#lista-profundidade-before').innerHTML = passos[stepIndex - 1].lista
         });
-        document.querySelector('#lista-profundidade-before').innerHTML = passos[stepIndex - 1].lista
     }
     
     d3.select("#tree").graphviz()
@@ -537,27 +542,38 @@ function renderStep() {
             )
             if (str.length > 0)
                 text.innerHTML = str
+
         }
+        finalizados[1] = true
         document.querySelector('#lista-profundidade-after').innerHTML = passos[stepIndex].lista
-    });
 
-    if (stepIndex == passos.length - 1)
-        document.getElementById('nextStep').disabled = true
-    else
-        document.getElementById('nextStep').disabled = false
+        if (stepIndex == passos.length - 1)
+            document.getElementById('nextStep').disabled = true
+        else
+            document.getElementById('nextStep').disabled = false
 
-    if (stepIndex > 0)
-        document.getElementById('prevStep').disabled = false
-    else
-        document.getElementById('prevStep').disabled = true
+        if (stepIndex > 0)
+            document.getElementById('prevStep').disabled = false
+        else
+            document.getElementById('prevStep').disabled = true
+    });   
 }
 
 function nextStep() {
-    stepIndex += 1
-    renderStep()
+    if (stepIndex < passos.length) {
+        stepIndex += 1
+        renderStep()
+    }
 }
 
 function prevStep() {
-    stepIndex -= 1
-    renderStep()
+    if (stepIndex > 0) {
+        stepIndex -= 1
+        renderStep()
+    }
+}
+
+function disableButtons() {
+    document.getElementById('nextStep').disabled = true
+    document.getElementById('prevStep').disabled = true
 }
