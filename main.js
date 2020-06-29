@@ -57,6 +57,7 @@ class NoIntermediario extends No {
 }
 
 let passos = []
+let finalizados = [true, true]
 
 function procura(caracter, raiz, caminho) {
     if (raiz instanceof NoIntermediario) {
@@ -502,7 +503,7 @@ function renderStep() {
     document.getElementById('tree').innerHTML = ''
     document.getElementById('tree-prev-step').innerHTML = ''
 
-    let finalizados = [false, false]
+    finalizados = [false, false]
 
     if (stepIndex - 1 >= 0) {
         d3.select("#tree-prev-step").graphviz()
@@ -524,7 +525,8 @@ function renderStep() {
             finalizados[0] = true
             document.querySelector('#lista-profundidade-before').innerHTML = passos[stepIndex - 1].lista
         });
-    }
+    } else
+        finalizados[0] = true
     
     d3.select("#tree").graphviz()
     .keyMode('tag-index')
@@ -560,14 +562,14 @@ function renderStep() {
 }
 
 function nextStep() {
-    if (stepIndex < passos.length) {
+    if (stepIndex < passos.length && finalizados[0] && finalizados[1]) {
         stepIndex += 1
         renderStep()
     }
 }
 
 function prevStep() {
-    if (stepIndex > 0) {
+    if (stepIndex > 0 && finalizados[0] && finalizados[1]) {
         stepIndex -= 1
         renderStep()
     }
