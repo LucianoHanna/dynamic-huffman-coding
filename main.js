@@ -1,9 +1,5 @@
-class No {
-}
-
-class Folha extends No {
+class Folha {
     constructor (vazio, caracter, cont, pai) {
-        super()
         this.vazio = vazio
         this.caracter = caracter
         this.cont = cont
@@ -17,9 +13,8 @@ class Folha extends No {
     }
 }
 
-class NoIntermediario extends No {
+class NoIntermediario {
     constructor (filho_esquerda, filho_direita, pai) {
-        super()
         this.filho_esquerda = filho_esquerda
         this.filho_direita = filho_direita
         this.pai = pai
@@ -359,13 +354,27 @@ function decodifica(str) {
     return {raiz, output}
 }
 
-function showTree(no) {
-    let z = 'digraph {' + makeString(no) + '}'
-    d3.select("#tree").graphviz()
-    .keyMode('tag-index')
-    .zoom(false)
-    .fade(false)
-    .renderDot(z);
+function showTree(treeId, tree, onFinish) {
+    d3.select(treeId).graphviz()
+        .keyMode('title')
+        .zoom(false)
+        .fade(false)
+        .dot(tree)
+        .render()
+        .on('end', () => {
+            let texts = document.querySelectorAll(`${treeId} g > text`)
+            for (text of texts) {
+                let str = text.innerHTML.substring(
+                    text.innerHTML.lastIndexOf('{') + 1, 
+                    text.innerHTML.lastIndexOf('}')
+                )
+                if (str.length > 0)
+                    text.innerHTML = str
+            }
+
+            onFinish();
+            
+        });
 }
 
 function makeString(no) {
@@ -446,16 +455,7 @@ function makeString(no) {
 
 function buttonCodificar() {
     let str = $('#input-string').val()
-    document.getElementById('tree').innerHTML = ''
-    document.getElementById('tree-prev-step').innerHTML = ''
-    document.getElementById('operacao').innerHTML = ''
-    document.getElementById('string-codificada').innerText = ''
-    document.getElementById('taxa-compactacao').innerText = ''
-    document.querySelector('#lista-profundidade-before').innerHTML = ''
-    document.querySelector('#lista-profundidade-after').innerHTML = ''
-    document.getElementById('prevStep').disabled = true
-    passos = []
-    stepIndex = -1
+    cleanAll()
     codificaString(str)
     
     if (passos.length > 0)
@@ -465,18 +465,7 @@ function buttonCodificar() {
 
 function buttonDecodificar() {
     let str = $('#input-string').val()
-    
-    document.getElementById('tree').innerHTML = ''
-    document.getElementById('tree-prev-step').innerHTML = ''
-    document.getElementById('operacao').innerHTML = ''
-    document.getElementById('string-codificada').innerText = ''
-    document.getElementById('taxa-compactacao').innerText = ''
-    document.querySelector('#lista-profundidade-before').innerHTML = ''
-    document.querySelector('#lista-profundidade-after').innerHTML = ''
-    document.getElementById('prevStep').disabled = true
-    passos = []
-    stepIndex = -1
-
+    cleanAll()
     decodifica(str)
     
     if (passos.length > 0)
@@ -500,52 +489,19 @@ function renderStep() {
 
     document.getElementById('taxa-compactacao').innerText = `${Number(passos[stepIndex].numeroBitsOriginal / passos[stepIndex].numeroBitsCompactado).toFixed(3)} (${passos[stepIndex].numeroBitsOriginal}:${passos[stepIndex].numeroBitsCompactado})`
     document.getElementById('string-codificada').innerText = passos[stepIndex].output
-    document.getElementById('tree').innerHTML = ''
-    document.getElementById('tree-prev-step').innerHTML = ''
+    cleanTrees()
 
     finalizados = [false, false]
 
     if (stepIndex - 1 >= 0) {
-        d3.select("#tree-prev-step").graphviz()
-        .keyMode('title')
-        .zoom(false)
-        .fade(false)
-        .dot(passos[stepIndex-1].arvore)
-        .render()
-        .on('end', () => {
-            let texts = document.querySelectorAll('#tree-prev-step g > text')
-            for (text of texts) {
-                let str = text.innerHTML.substring(
-                    text.innerHTML.lastIndexOf('{') + 1, 
-                    text.innerHTML.lastIndexOf('}')
-                )
-                if (str.length > 0)
-                    text.innerHTML = str
-            }
+        showTree('#tree-prev-step', passos[stepIndex - 1].arvore, () => {
             finalizados[0] = true
             document.querySelector('#lista-profundidade-before').innerHTML = passos[stepIndex - 1].lista
-        });
+        })
     } else
         finalizados[0] = true
     
-    d3.select("#tree").graphviz()
-    .keyMode('tag-index')
-    .zoom(false)
-    .fade(false)
-    .dot(passos[stepIndex].arvore)
-    .render()
-
-    .on('end', () => {
-        let texts = document.querySelectorAll('#tree g > text')
-        for (text of texts) {
-            let str = text.innerHTML.substring(
-                text.innerHTML.lastIndexOf('{') + 1, 
-                text.innerHTML.lastIndexOf('}')
-            )
-            if (str.length > 0)
-                text.innerHTML = str
-
-        }
+    showTree('#tree', passos[stepIndex].arvore, () => {
         finalizados[1] = true
         document.querySelector('#lista-profundidade-after').innerHTML = passos[stepIndex].lista
 
@@ -558,7 +514,7 @@ function renderStep() {
             document.getElementById('prevStep').disabled = false
         else
             document.getElementById('prevStep').disabled = true
-    });   
+    })
 }
 
 function nextStep() {
@@ -578,4 +534,21 @@ function prevStep() {
 function disableButtons() {
     document.getElementById('nextStep').disabled = true
     document.getElementById('prevStep').disabled = true
+}
+
+function cleanTrees() {
+    document.getElementById('tree').innerHTML = ''
+    document.getElementById('tree-prev-step').innerHTML = ''
+}
+
+function cleanAll() {
+    cleanTrees()
+    document.getElementById('operacao').innerHTML = ''
+    document.getElementById('string-codificada').innerText = ''
+    document.getElementById('taxa-compactacao').innerText = ''
+    document.querySelector('#lista-profundidade-before').innerHTML = ''
+    document.querySelector('#lista-profundidade-after').innerHTML = ''
+    document.getElementById('prevStep').disabled = true
+    passos = []
+    stepIndex = -1
 }
