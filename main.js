@@ -454,7 +454,7 @@ function makeString(no) {
 }
 
 function buttonCodificar() {
-    let str = $('#input-string').val()
+    let str = document.querySelector('#input-string').value
     cleanAll()
     codificaString(str)
     
@@ -464,7 +464,7 @@ function buttonCodificar() {
 }
 
 function buttonDecodificar() {
-    let str = $('#input-string').val()
+    let str = document.querySelector('#input-string').value
     cleanAll()
     decodifica(str)
     
