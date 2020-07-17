@@ -283,6 +283,7 @@ function codificaString(str) {
 }
 
 function decodifica(str) {
+    str = str.trim()
     let raiz = new Folha(true, null, 0)
     let output = ''
 
